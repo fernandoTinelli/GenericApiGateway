@@ -1,9 +1,9 @@
 routes:
   /login:
-    gateway: servico1
+    services: servico1
   /authenticate:
-    gateway: servico1
+    services: servico1
   /summary:
-    gateway: servico1
+    services: servico1
     secure: true
     

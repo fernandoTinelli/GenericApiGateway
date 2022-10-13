@@ -2,10 +2,10 @@
 
 namespace App\Gateway\Configuration;
 
-use App\Gateway\Configuration\Factory\GatewayFactory;
 use App\Gateway\Configuration\Factory\RouteFactory;
-use App\Gateway\Configuration\Model\Gateway;
+use App\Gateway\Configuration\Factory\ServiceFactory;
 use App\Gateway\Configuration\Model\Route;
+use App\Gateway\Configuration\Model\Service;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -13,7 +13,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class APIGatewayConfiguration
 {
-    private array $gateways;
+    private array $services;
 
     private array $routes;
 
@@ -26,10 +26,10 @@ class APIGatewayConfiguration
             )
         );
 
-        $this->gateways = $this->getArrayGateways(
+        $this->services = $this->getArrayServices(
             Yaml::parseFile(
                 $paramsBag->get('kernel.project_dir')
-                . '/config/gateway/gateways.yaml'
+                . '/config/gateway/services.yaml'
             )
         );
     }
@@ -39,24 +39,24 @@ class APIGatewayConfiguration
         return $this->routes[$route] ?? null;
     }
 
-    public function getService(string $service): ?Gateway
+    public function getService(string $service): ?Service
     {
-        return $this->gateways[$service] ?? null;
+        return $this->services[$service] ?? null;
     }
 
-    private function getArrayGateways(array $routesData): array
+    private function getArrayServices(array $routesData): array
     {
         $routes = [];
         
-        if (array_key_first($routesData) != 'gateways') {
+        if (array_key_first($routesData) != 'services') {
             throw new HttpException(
                 Response::HTTP_BAD_GATEWAY,
-                "Erro no arquivo de configuração de Gateways da API Gateway: raiz gateways não encontrada"
+                "Erro no arquivo de configuração de Serviços da API Gateway: raiz 'services' não encontrada"
             );
         }
 
         foreach ($routesData as $route) {
-            $routes[array_key_first($route)] = GatewayFactory::create($route);
+            $routes[array_key_first($route)] = ServiceFactory::create($route);
         }
 
         return $routes;
@@ -64,19 +64,19 @@ class APIGatewayConfiguration
 
     private function getArrayRoutes(array $routesData): array
     {
-        $gateways = [];
+        $services = [];
         
         if (array_key_first($routesData) != 'routes') {
             throw new HttpException(
                 Response::HTTP_BAD_GATEWAY,
-                "Erro no arquivo de configuração de Rotas da API Gateway: raiz routes não encontrada"
+                "Erro no arquivo de configuração de Rotas da API Gateway: raiz 'routes' não encontrada"
             );
         }
 
         foreach ($routesData as $route) {
-            $gateways[array_key_first($route)] = RouteFactory::create($route);
+            $services[array_key_first($route)] = RouteFactory::create($route);
         }
 
-        return $gateways;
+        return $services;
     }
 }

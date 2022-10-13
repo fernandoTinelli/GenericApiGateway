@@ -9,7 +9,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class RouteFactory
 {
     const PROPERTIES = [
-        'gateway',
+        'service',
         'secure'
     ];
 
@@ -21,7 +21,7 @@ class RouteFactory
 
         return (new Route())
             ->setName($name)
-            ->setGatewayName($data[$name]['gateway'])
+            ->setServiceName($data[$name]['service'])
             ->setSecure($data[$name]['secure'])
         ;
     }

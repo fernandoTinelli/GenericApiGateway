@@ -2,23 +2,23 @@
 
 namespace App\Gateway\Configuration\Factory;
 
-use App\Gateway\Configuration\Model\Gateway;
+use App\Gateway\Configuration\Model\Service;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class GatewayFactory
+class ServiceFactory
 {
     const PROPERTIES = [
         'address'
     ];
 
-    public static function create(array $data): Gateway
+    public static function create(array $data): Service
     {
         self::validateData($data);
 
         $name = array_key_first($data);
 
-        return (new Gateway())
+        return (new Service())
             ->setName($name)
             ->setAddress($data[$name]['address'])
         ;

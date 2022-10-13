@@ -2,7 +2,7 @@
 
 namespace App\Gateway\Configuration\Model;
 
-class Gateway
+class Service
 {
     private string $name;
 

@@ -6,7 +6,7 @@ class Route
 {
     private string $name;
 
-    private string $gatewayName;
+    private string $serviceName;
 
     private bool $secure;
 
@@ -22,14 +22,14 @@ class Route
         return $this;
     }
 
-    public function getGatewayName(): string
+    public function getServiceName(): string
     {
-        return $this->gatewayName;
+        return $this->serviceName;
     }
 
-    public function setGatewayName(string $gatewayName): self
+    public function setServiceName(string $serviceName): self
     {
-        $this->gatewayName = $gatewayName;
+        $this->serviceName = $serviceName;
 
         return $this;
     }

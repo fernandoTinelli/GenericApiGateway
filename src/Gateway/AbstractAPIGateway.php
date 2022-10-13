@@ -93,7 +93,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
             $options['body'] = $content->getData();
         }
 
-        $url = $this->configuration->getService($route->getGatewayName())->getAddress()
+        $url = $this->configuration->getService($route->getServiceName())->getAddress()
             . $route->getName();
 
         return JsonServiceResponse::encode($this->requester->request(
@@ -137,7 +137,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
             ));
         }
 
-        $service = $this->configuration->getService($route->getGatewayName());
+        $service = $this->configuration->getService($route->getServiceName());
         if (is_null($service)) {
             return JsonServiceResponse::encode(new JsonServiceResponse(
                 status: ServiceResponseStatus::FAIL,
