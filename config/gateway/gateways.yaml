@@ -1,0 +1,3 @@
+gateways:
+  servico1:
+    address: https://api.covid19api.com

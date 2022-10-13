@@ -1,0 +1,25 @@
+version: '3.9'
+
+services:
+    symfony: &symfony-template
+      image: ${COMPOSE_PROJECT_NAME}_symfony:latest
+      build:
+        context: .
+        args:
+          BUILD_ARGUMENT_ENV: dev
+          HOST_UID: ${HOST_UID}
+          HOST_GID: ${HOST_GID}
+        dockerfile: ./Dockerfile
+      container_name: ${COMPOSE_PROJECT_NAME}_symfony
+      expose:
+        - 80
+      ports:
+        - "80:80"
+      volumes:
+        - .:/var/www/projeto
+      networks:
+        - net
+
+networks:
+  net:
+    name: net
