@@ -1,0 +1,9 @@
+routes:
+  /login:
+    services: servico1
+  /authenticate:
+    services: servico1
+  /summary:
+    services: servico1
+    secure: true
+    

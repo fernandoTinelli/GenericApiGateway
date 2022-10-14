@@ -17,15 +17,15 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractAPIGateway implements APIGatewayInterface
 {
+    public static string $routesFilePath;
+
+    public static string $servicesFilePath;
+
     protected Requester $requester;
 
     protected APIGatewayConfiguration $configuration;
 
-    #[Required]
-    public function init(APIGatewayConfiguration $configuration): void
-    {
-        $this->configuration = $configuration;   
-    }
+    abstract public function init(APIGatewayConfiguration $configuration): void;
 
     public function handle(Request $request): JsonResponse
     {

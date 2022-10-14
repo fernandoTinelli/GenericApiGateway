@@ -2,11 +2,11 @@
 
 namespace App\Gateway\Configuration;
 
+use App\Gateway\AbstractAPIGateway;
 use App\Gateway\Configuration\Factory\RouteFactory;
 use App\Gateway\Configuration\Factory\ServiceFactory;
 use App\Gateway\Configuration\Model\Route;
 use App\Gateway\Configuration\Model\Service;
-use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Yaml\Yaml;
@@ -17,20 +17,14 @@ class APIGatewayConfiguration
 
     private array $routes;
 
-    public function __construct(ContainerBagInterface $paramsBag)
+    public function __construct()
     {
         $this->routes = $this->getArrayRoutes(
-            Yaml::parseFile(
-                $paramsBag->get('kernel.project_dir')
-                . '/config/gateway/routes.yaml'
-            )
+            Yaml::parseFile(AbstractAPIGateway::$routesFilePath)
         );
 
         $this->services = $this->getArrayServices(
-            Yaml::parseFile(
-                $paramsBag->get('kernel.project_dir')
-                . '/config/gateway/services.yaml'
-            )
+            Yaml::parseFile(AbstractAPIGateway::$servicesFilePath)
         );
     }
 
