@@ -2,32 +2,30 @@
 
 namespace App\Requester;
 
+use App\Response\JsonServiceRequest;
 use App\Response\JsonServiceResponse;
 use App\Response\ServiceResponseStatus;
 use GuzzleHttp\Client;
 
 class Requester implements RequesterInterface
 {
-    public function request(string $url, string $method = 'GET', array $options = []): JsonServiceResponse
+    public function request(JsonServiceRequest $request): JsonServiceResponse
     {
         try {
-            $client = new Client();
+            $client = new Client(['cookies' => true]);
 
             $response = $client->request(
-                uri: $url,
-                method: $method,
-                options: $options
+                uri: $request->getUrl(),
+                method: $request->getMethod(),
+                options: $request->getServiceRequestOptions()->getOptions()
             );
 
             $response = json_decode((string) $response->getBody(), true);
 
             return new JsonServiceResponse(
-                // status: ServiceResponseStatus::from($response['status']),
-                status: ServiceResponseStatus::SUCCESS,
-                // data: $response['data'],
-                data: $response,
-                // message: $response['message']
-                message: $response['Message']
+                status: ServiceResponseStatus::from($response['status']),
+                data: $response['data'],
+                message: $response['message']
             );
 
         } catch (\Throwable $th) {

@@ -37,7 +37,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         }
 
         if ($ret->isSecure()) {
-            if (!$this->userHasValidAuthentication()) {
+            if (!$this->userHasValidAuthentication($request)) {
                 return JsonServiceResponse::encode(new JsonServiceResponse(
                     status: ServiceResponseStatus::FAIL,
                     message: 'Você não está autenticado ou sua autenticação expirou'
@@ -76,55 +76,30 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
     protected function getResponse(Route $route, Request $request): JsonResponse
     {
-        $options = [];
-        $query = $request->query->all();
-        $form = $request->request->all();
-        $content = JsonServiceRequest::decode($request->getContent());
-
-        if (!empty($query)) {
-            $options['query'] = $query;
-        }
-
-        if (!empty($form)) {
-            $options['request'] = $form;
-        }
-
-        if (!empty($content->getData())) {
-            $options['body'] = $content->getData();
-        }
-
         $url = $this->configuration->getService($route->getServiceName())->getAddress()
             . $route->getName();
 
-        return JsonServiceResponse::encode($this->requester->request(
-            $url,
-            $request->getMethod(),
-            $options
-        ));
+        $jsonServiceRequest = new JsonServiceRequest($url, $request);
+
+        return JsonServiceResponse::encode($this->requester->request($jsonServiceRequest));
     }
 
-    protected function userHasAuthentication(): bool
+    protected function userHasValidAuthentication(Request $request): bool
     {
-        $jar = new CookieJar();
-        return is_null($jar->getCookieByName('BEARER'));
-    }
-
-    protected function userHasValidAuthentication(): bool
-    {
-        if (!$this->userHasAuthentication()) {
+        if (!$request->cookies->has('BEARER')) {
             return false;
         }
 
-        $jar = new CookieJar();
-        $cookieTokenJWT = $jar->getCookieByName('BEARER');
-
         $routeAuthentication = $this->configuration->getRoute('/authenticate');
-        $jsonResponse = $this->getResponse($routeAuthentication, new Request([
-            CookieJar::fromArray($cookieTokenJWT->toArray(), 'localhost')
-        ]));
-        $jsonServiceReponse = JsonServiceResponse::decode($jsonResponse);
 
-        return $jsonServiceReponse->getStatus() === ServiceResponseStatus::SUCCESS;
+        $url = $this->configuration->getService($routeAuthentication->getServiceName())->getAddress()
+                . $routeAuthentication->getName();
+
+        $jsonServiceRequest = new JsonServiceRequest($url, $request);
+        
+        $JsonServiceResponse = $this->requester->request($jsonServiceRequest);
+
+        return $JsonServiceResponse->getStatus() === ServiceResponseStatus::SUCCESS;
     }
 
     protected function validateRequest(string $uri): Route | JsonResponse

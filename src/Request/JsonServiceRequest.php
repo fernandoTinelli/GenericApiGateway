@@ -2,22 +2,41 @@
 
 namespace App\Response;
 
+use App\Request\ServiceRequestOptions;
+use Symfony\Component\HttpFoundation\Request;
+
 class JsonServiceRequest
 {
-    protected array $data;
+    private string $url;
 
-    public function __construct(array $data)
+    private string $method;
+
+    private ServiceRequestOptions $options;
+
+    public function __construct(string $url, Request $request)
     {
-        $this->data = $data;
+        $this->url = $url;
+        $this->method = $request->getMethod();
+        $this->options = new ServiceRequestOptions(
+            query: $request->query->all(),
+            formParams: $request->request->all(),
+            json: json_decode($request->getContent(), true),
+            cookies: $request->cookies->all()
+        );
     }
 
-    public function getData(): array
+    public function getUrl(): string
     {
-        return $this->data;
+        return $this->url;
     }
 
-    public static function decode(string $requestContent): self
+    public function getMethod(): string
     {
-        return (new self(json_decode($requestContent), true));
+        return $this->method;
+    }
+
+    public function getServiceRequestOptions(): ServiceRequestOptions
+    {
+        return $this->options;
     }
 }
