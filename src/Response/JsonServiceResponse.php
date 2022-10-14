@@ -6,9 +6,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 
 enum ServiceResponseStatus: int
 {
-    case SUCCESS = 1;
-    case FAIL    = 2;
-    case ERROR   = 3;
+    case SUCCESS      = 200;
+    case FAIL         = 400;
+    case ERROR        = 500;
+    case UNAUTHORIZED = 404;
 }
 
 class JsonServiceResponse
