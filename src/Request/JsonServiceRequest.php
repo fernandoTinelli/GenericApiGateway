@@ -2,6 +2,7 @@
 
 namespace App\Response;
 
+use App\Gateway\CircuitBreaker\CircuitBreakerInterface;
 use App\Request\ServiceRequestOptions;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -13,7 +14,9 @@ class JsonServiceRequest
 
     private ServiceRequestOptions $options;
 
-    public function __construct(string $url, Request $request)
+    private ?CircuitBreakerInterface $circuitBreaker;
+
+    public function __construct(string $url, Request $request, CircuitBreakerInterface $circuitBreaker = null)
     {
         $this->url = $url;
         $this->method = $request->getMethod();
@@ -23,6 +26,7 @@ class JsonServiceRequest
             json: json_decode($request->getContent(), true),
             cookies: $request->cookies->all()
         );
+        $this->circuitBreaker = $circuitBreaker;
     }
 
     public function getUrl(): string
@@ -38,5 +42,10 @@ class JsonServiceRequest
     public function getServiceRequestOptions(): ServiceRequestOptions
     {
         return $this->options;
+    }
+
+    public function getCircuitBreaker(): ?CircuitBreakerInterface
+    {
+        return $this->circuitBreaker;
     }
 }

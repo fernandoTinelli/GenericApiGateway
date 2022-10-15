@@ -10,7 +10,8 @@ class RouteFactory
 {
     const PROPERTIES = [
         'service',
-        'secure'
+        'secure',
+        'circuitBreaker'
     ];
 
     public static function create(array $data): Route
@@ -23,6 +24,7 @@ class RouteFactory
             ->setName($name)
             ->setServiceName($data[$name]['service'])
             ->setSecure($data[$name]['secure'])
+            ->setCircuitBreaker($data[$name]['circuitBreaker'])
         ;
     }
 

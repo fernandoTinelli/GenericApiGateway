@@ -2,6 +2,7 @@
 
 namespace App\Gateway;
 
+use App\Gateway\CircuitBreaker\Exception\CircuitBreakerException;
 use App\Gateway\Configuration\APIGatewayConfiguration;
 use App\Gateway\Configuration\Model\Route;
 use App\Requester\Requester;
@@ -79,10 +80,11 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
     protected function getResponse(Route $route, Request $request): JsonResponse
     {
+    
         $url = $this->configuration->getService($route->getServiceName())->getAddress()
-            . $route->getName();
+        . $route->getName();
 
-        $jsonServiceRequest = new JsonServiceRequest($url, $request);
+        $jsonServiceRequest = new JsonServiceRequest($url, $request, $route->getCircuitBreaker());
 
         return JsonServiceResponse::encode($this->requester->request($jsonServiceRequest));
     }

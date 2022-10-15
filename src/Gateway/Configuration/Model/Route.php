@@ -2,6 +2,10 @@
 
 namespace App\Gateway\Configuration\Model;
 
+use App\Gateway\CircuitBreaker\CircuitBreakerInterface;
+use App\Gateway\CircuitBreaker\Types\DefaultCircuitBreaker;
+use Symfony\Component\VarExporter\Exception\ClassNotFoundException;
+
 class Route
 {
     private string $name;
@@ -9,6 +13,8 @@ class Route
     private string $serviceName;
 
     private bool $secure;
+
+    private CircuitBreakerInterface $circuitBreaker;
 
     public function getName(): string
     {
@@ -39,10 +45,26 @@ class Route
         return $this->secure;
     }
 
-    public function setSecure(bool $secure = true): self
+    public function setSecure(bool $secure): self
     {
         $this->secure = $secure;
 
+        return $this;
+    }
+
+    public function getCircuitBreaker(): CircuitBreakerInterface
+    {
+        return $this->circuitBreaker;
+    }
+
+    public function setCircuitBreaker(string $circuitBreakerClassName): self
+    {
+        try {
+            $this->circuitBreaker = new ("\App\Gateway\CircuitBreaker\Types\$circuitBreakerClassName")();
+        } catch (ClassNotFoundException $e) {
+            $this->circuitBreaker = new DefaultCircuitBreaker();
+        }
+        
         return $this;
     }
 }
