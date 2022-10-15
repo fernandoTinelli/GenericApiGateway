@@ -2,7 +2,6 @@
 
 namespace App\Gateway;
 
-use App\Gateway\CircuitBreaker\Exception\CircuitBreakerException;
 use App\Gateway\Configuration\APIGatewayConfiguration;
 use App\Gateway\Configuration\Model\Route;
 use App\Requester\Requester;
@@ -100,7 +99,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         $url = $this->configuration->getService($routeAuthentication->getServiceName())->getAddress()
                 . $routeAuthentication->getName();
 
-        $jsonServiceRequest = new JsonServiceRequest($url, $request);
+        $jsonServiceRequest = new JsonServiceRequest($url, $request, $routeAuthentication->getCircuitBreaker());
         
         $JsonServiceResponse = $this->requester->request($jsonServiceRequest);
 
