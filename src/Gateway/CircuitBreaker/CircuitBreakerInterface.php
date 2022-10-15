@@ -7,5 +7,5 @@ use App\Response\JsonServiceResponse;
 
 interface CircuitBreakerInterface
 {
-    public function doDummy(JsonServiceRequest $request): JsonServiceResponse;
+    public function doDummy(JsonServiceRequest $request, string $errorMessage = ""): JsonServiceResponse;
 }

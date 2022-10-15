@@ -29,14 +29,7 @@ class Requester implements RequesterInterface
             );
 
         } catch (\Throwable $th) {
-            if (!is_null($request->getCircuitBreaker())) {
-                return $request->getCircuitBreaker()->doDummy($request);
-            }
-
-            return new JsonServiceResponse(
-                status: ServiceResponseStatus::ERROR,
-                message: "Erro ao realizar a solicitação __MESSAGE__EXCEPTION: " . $th->getMessage()
-            );
+            return $request->getCircuitBreaker()->doDummy($request, $th->getMessage());
         }
     }
 }

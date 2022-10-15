@@ -9,9 +9,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class RouteFactory
 {
     const PROPERTIES = [
-        'service',
-        'secure',
-        'circuitBreaker'
+        'service'        => true,
+        'secure'         => false,
+        'circuitBreaker' => false
     ];
 
     public static function create(array $data): Route
@@ -23,8 +23,8 @@ class RouteFactory
         return (new Route())
             ->setName($name)
             ->setServiceName($data[$name]['service'])
-            ->setSecure($data[$name]['secure'])
-            ->setCircuitBreaker($data[$name]['circuitBreaker'])
+            ->setSecure($data[$name]['secure'] ?? null)
+            ->setCircuitBreaker($data[$name]['circuitBreaker'] ?? null)
         ;
     }
 
@@ -32,8 +32,19 @@ class RouteFactory
     {
         $name = array_key_first($data);
 
-        foreach (self::PROPERTIES as $props) {
-            if (!array_key_exists($props, $data[$name])) {
+        // Validate the props of the route
+        foreach ($data[$name] as $props) {
+            if (!array_key_exists($props, self::PROPERTIES)) {
+                throw new HttpException(
+                    Response::HTTP_BAD_GATEWAY,
+                    "Erro no arquivo de configuração de Rotas da API Gateway: $props não é uma propriedade válida"
+                );
+            }
+        }
+
+        // Validate the required props
+        foreach (self::PROPERTIES as $props => $required) {
+            if ($required && !array_key_exists($props, $data[$name])) {
                 throw new HttpException(
                     Response::HTTP_BAD_GATEWAY,
                     "Erro no arquivo de configuração de Rotas da API Gateway: $props não encontrada"

@@ -14,9 +14,9 @@ class JsonServiceRequest
 
     private ServiceRequestOptions $options;
 
-    private ?CircuitBreakerInterface $circuitBreaker;
+    private CircuitBreakerInterface $circuitBreaker;
 
-    public function __construct(string $url, Request $request, CircuitBreakerInterface $circuitBreaker = null)
+    public function __construct(string $url, Request $request, CircuitBreakerInterface $circuitBreaker)
     {
         $this->url = $url;
         $this->method = $request->getMethod();
@@ -44,7 +44,7 @@ class JsonServiceRequest
         return $this->options;
     }
 
-    public function getCircuitBreaker(): ?CircuitBreakerInterface
+    public function getCircuitBreaker(): CircuitBreakerInterface
     {
         return $this->circuitBreaker;
     }

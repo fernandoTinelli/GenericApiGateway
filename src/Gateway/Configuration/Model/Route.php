@@ -45,9 +45,9 @@ class Route
         return $this->secure;
     }
 
-    public function setSecure(bool $secure): self
+    public function setSecure(?bool $secure): self
     {
-        $this->secure = $secure;
+        $this->secure = $secure ?? true;
 
         return $this;
     }
@@ -57,9 +57,13 @@ class Route
         return $this->circuitBreaker;
     }
 
-    public function setCircuitBreaker(string $circuitBreakerClassName): self
+    public function setCircuitBreaker(?string $circuitBreakerClassName): self
     {
         try {
+            if (is_null($circuitBreakerClassName)) {
+                throw new ClassNotFoundException("");
+            }
+
             $this->circuitBreaker = new ("\App\Gateway\CircuitBreaker\Types\$circuitBreakerClassName")();
         } catch (ClassNotFoundException $e) {
             $this->circuitBreaker = new DefaultCircuitBreaker();
