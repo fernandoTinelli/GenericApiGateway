@@ -30,7 +30,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         $this->requester = $requester;
     }
 
-    public function handle(Request $request): JsonResponse
+    public function handle(Request $request): Response
     {
         $uri = $request->getPathInfo();
         $ret = $this->validateRequest($uri);
@@ -51,7 +51,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         return $this->getResponse($ret, $request);
     }
 
-    public function authenticate(Request $request): JsonResponse
+    public function authenticate(Request $request): Response
     {
         $routeLogin = $this->configuration->getRoute('/login');
         
