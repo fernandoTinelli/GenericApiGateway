@@ -23,7 +23,4 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    app.current.APIGateway:
-        class: '%env(resolve:API_GATEWAY_CLASS_PATH)%'
-
-    App\Gateway\AbstractAPIGateway: '@app.current.APIGateway'
+    App\Gateway\AbstractAPIGateway: '@App\Gateway\Types\MainApiGateway'

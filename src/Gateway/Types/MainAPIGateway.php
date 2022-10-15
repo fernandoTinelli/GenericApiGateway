@@ -2,15 +2,15 @@
 
 namespace App\Gateway\Types;
 
-use App\Requester\Requester;
+use App\Gateway\AbstractAPIGateway;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 
-class MainAPIGateway extends AbstractTypeAPIGateway
+class MainAPIGateway extends AbstractAPIGateway
 {
-    public function __construct(Requester $requester, ContainerBagInterface $paramsBag)
+    public function __construct(ContainerBagInterface $paramsBag)
     {
-        $this->requester = $requester;
         $this->paramsBag = $paramsBag;
-        $this->folder = "main";
+
+        AbstractAPIGateway::$configPath = "main";
     }
 }
