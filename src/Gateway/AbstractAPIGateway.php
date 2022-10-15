@@ -4,6 +4,7 @@ namespace App\Gateway;
 
 use App\Gateway\Configuration\APIGatewayConfiguration;
 use App\Gateway\Configuration\Model\Route;
+use App\Gateway\Log\RequestLogger;
 use App\Requester\Requester;
 use App\Response\JsonServiceRequest;
 use App\Response\JsonServiceResponse;
@@ -23,6 +24,8 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
     protected APIGatewayConfiguration $configuration;
 
+    protected RequestLogger $logger;
+
     #[Required]
     public function init(APIGatewayConfiguration $configuration, Requester $requester): void
     {
@@ -41,10 +44,10 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
         if ($ret->isSecure()) {
             if (!$this->userHasValidAuthentication($request)) {
-                return JsonServiceResponse::encode(new JsonServiceResponse(
-                    status: ServiceResponseStatus::FAIL,
-                    message: 'Você não está autenticado ou sua autenticação expirou'
-                ));
+                // return JsonServiceResponse::encode(new JsonServiceResponse(
+                //     status: ServiceResponseStatus::FAIL,
+                //     message: 'Você não está autenticado ou sua autenticação expirou'
+                // ));
             }
         }
 
@@ -84,6 +87,8 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         . $route->getName();
 
         $jsonServiceRequest = new JsonServiceRequest($url, $request, $route->getCircuitBreaker());
+
+        $this->logger->logRequest(RequestLogger::getRelevantDataToLog($request, $jsonServiceRequest));
 
         $response = $this->requester->request($jsonServiceRequest);
 

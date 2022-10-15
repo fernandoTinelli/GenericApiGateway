@@ -7,6 +7,7 @@ use App\Gateway\Configuration\Factory\RouteFactory;
 use App\Gateway\Configuration\Factory\ServiceFactory;
 use App\Gateway\Configuration\Model\Route;
 use App\Gateway\Configuration\Model\Service;
+use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Yaml\Yaml;
@@ -17,18 +18,18 @@ class APIGatewayConfiguration
 
     private array $routes;
 
-    public function __construct()
+    public function __construct(ContainerBagInterface $paramsBag)
     {
         $this->routes = $this->getArrayRoutes(
             Yaml::parseFile(
-                $this->paramsBag->get('kernel.project_dir')
+                $paramsBag->get('kernel.project_dir')
                 . "/config/gateways/" . AbstractAPIGateway::$configPath . "/routes.yaml"
             )
         );
 
-        $this->routes = $this->getArrayRoutes(
+        $this->services = $this->getArrayServices(
             Yaml::parseFile(
-                $this->paramsBag->get('kernel.project_dir')
+                $paramsBag->get('kernel.project_dir')
                 . "/config/gateways/" . AbstractAPIGateway::$configPath . "/services.yaml"
             )
         );
@@ -44,22 +45,22 @@ class APIGatewayConfiguration
         return $this->services[$service] ?? null;
     }
 
-    private function getArrayServices(array $routesData): array
+    private function getArrayServices(array $servicesData): array
     {
-        $routes = [];
+        $services = [];
         
-        if (array_key_first($routesData) != 'services') {
+        if (array_key_first($servicesData) != 'services') {
             throw new HttpException(
                 Response::HTTP_BAD_GATEWAY,
                 "Erro no arquivo de configuração de Serviços da API Gateway: raiz 'services' não encontrada"
             );
         }
 
-        foreach ($routesData as $route) {
-            $routes[array_key_first($route)] = ServiceFactory::create($route);
+        foreach ($servicesData['services'] as $name => $service) {
+            $services[$name] = ServiceFactory::create([$name => $service]);
         }
 
-        return $routes;
+        return $services;
     }
 
     private function getArrayRoutes(array $routesData): array
@@ -73,8 +74,8 @@ class APIGatewayConfiguration
             );
         }
 
-        foreach ($routesData as $route) {
-            $services[array_key_first($route)] = RouteFactory::create($route);
+        foreach ($routesData['routes'] as $name => $route) {
+            $services[$name] = RouteFactory::create([$name => $route]);
         }
 
         return $services;

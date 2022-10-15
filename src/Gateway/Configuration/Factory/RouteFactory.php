@@ -11,7 +11,7 @@ class RouteFactory
     const PROPERTIES = [
         'service'        => true,
         'secure'         => false,
-        'circuitBreaker' => false
+        'circuit_breaker' => false
     ];
 
     public static function create(array $data): Route
@@ -30,24 +30,24 @@ class RouteFactory
 
     private static function validateData(array $data): void
     {
-        $name = array_key_first($data);
-
-        // Validate the props of the route
-        foreach ($data[$name] as $props) {
-            if (!array_key_exists($props, self::PROPERTIES)) {
-                throw new HttpException(
-                    Response::HTTP_BAD_GATEWAY,
-                    "Erro no arquivo de configuração de Rotas da API Gateway: $props não é uma propriedade válida"
-                );
+        foreach ($data as $name => $props) {
+            foreach ($props as $prop => $value) {
+                // Validate the props of the route
+                if (!array_key_exists($prop, self::PROPERTIES)) {
+                    throw new HttpException(
+                        Response::HTTP_BAD_GATEWAY,
+                        "Erro no arquivo de configuração de Serviços da API Gateway: $prop não é uma propriedade válida"
+                    );
+                }
             }
         }
 
         // Validate the required props
-        foreach (self::PROPERTIES as $props => $required) {
-            if ($required && !array_key_exists($props, $data[$name])) {
+        foreach (self::PROPERTIES as $prop => $required) {
+            if ($required && !array_key_exists($prop, $data[array_key_first($data)])) {
                 throw new HttpException(
                     Response::HTTP_BAD_GATEWAY,
-                    "Erro no arquivo de configuração de Rotas da API Gateway: $props não encontrada"
+                    "Erro no arquivo de configuração de Serviços da API Gateway: $prop não encontrada"
                 );
             }
         }

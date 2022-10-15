@@ -1,14 +1,14 @@
 routes:
   /login:
-    services: servico1
+    service: servico1
     secure: false
     circuit_breaker: DefaultCircuitBreaker
   /authenticate:
-    services: servico1
+    service: servico1
     secure: false
     circuit_breaker: DefaultCircuitBreaker
   /summary:
-    services: servico1
+    service: servico1
     secure: true
     circuit_breaker: DefaultCircuitBreaker
     

@@ -21,10 +21,10 @@ class JsonServiceRequest
         $this->url = $url;
         $this->method = $request->getMethod();
         $this->options = new ServiceRequestOptions(
-            query: $request->query->all(),
-            formParams: $request->request->all(),
-            json: json_decode($request->getContent(), true),
-            cookies: $request->cookies->all()
+            query: $request->query->all() ?? [],
+            formParams: $request->request->all() ?? [],
+            json: json_decode($request->getContent(), true) ?? [],
+            cookies: $request->cookies->all() ?? []
         );
         $this->circuitBreaker = $circuitBreaker;
     }
@@ -47,5 +47,14 @@ class JsonServiceRequest
     public function getCircuitBreaker(): CircuitBreakerInterface
     {
         return $this->circuitBreaker;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'url' => $this->url,
+            'method' => $this->method,
+            'circuit_breaker' => $this->circuitBreaker::class
+        ];
     }
 }
