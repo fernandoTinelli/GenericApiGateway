@@ -77,7 +77,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         return $jsonResponse;
     }
 
-    protected function getResponse(Route $route, Request $request): JsonResponse
+    protected function getResponse(Route $route, Request $request): Response
     {
     
         $url = $this->configuration->getService($route->getServiceName())->getAddress()
@@ -85,7 +85,13 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
         $jsonServiceRequest = new JsonServiceRequest($url, $request, $route->getCircuitBreaker());
 
-        return JsonServiceResponse::encode($this->requester->request($jsonServiceRequest));
+        $response = $this->requester->request($jsonServiceRequest);
+
+        if ($response instanceof Response) {
+            return $response;
+        }
+        
+        return JsonServiceResponse::encode($response);
     }
 
     protected function userHasValidAuthentication(Request $request): bool
@@ -101,9 +107,13 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
         $jsonServiceRequest = new JsonServiceRequest($url, $request, $routeAuthentication->getCircuitBreaker());
         
-        $JsonServiceResponse = $this->requester->request($jsonServiceRequest);
+        $jsonServiceResponse = $this->requester->request($jsonServiceRequest);
 
-        return $JsonServiceResponse->getStatus() === ServiceResponseStatus::SUCCESS;
+        if ($jsonServiceResponse instanceof Response) {
+            return false;
+        }
+
+        return $jsonServiceResponse->getStatus() === ServiceResponseStatus::SUCCESS;
     }
 
     protected function validateRequest(string $uri): Route | JsonResponse

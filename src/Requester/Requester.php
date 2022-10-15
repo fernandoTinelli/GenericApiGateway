@@ -6,10 +6,11 @@ use App\Response\JsonServiceRequest;
 use App\Response\JsonServiceResponse;
 use App\Response\ServiceResponseStatus;
 use GuzzleHttp\Client;
+use Symfony\Component\HttpFoundation\Response;
 
 class Requester implements RequesterInterface
 {
-    public function request(JsonServiceRequest $request): JsonServiceResponse
+    public function request(JsonServiceRequest $request): JsonServiceResponse | Response
     {
         try {
             $client = new Client(['cookies' => true]);
@@ -27,7 +28,6 @@ class Requester implements RequesterInterface
                 data: $response['data'],
                 message: $response['message']
             );
-
         } catch (\Throwable $th) {
             return $request->getCircuitBreaker()->doDummy($request, $th->getMessage());
         }

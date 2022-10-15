@@ -3,9 +3,9 @@
 namespace App\Gateway\CircuitBreaker;
 
 use App\Response\JsonServiceRequest;
-use App\Response\JsonServiceResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 interface CircuitBreakerInterface
 {
-    public function doDummy(JsonServiceRequest $request, string $errorMessage = ""): JsonServiceResponse;
+    public function doDummy(JsonServiceRequest $request, string $errorMessage = ""): Response;
 }
