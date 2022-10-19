@@ -3,12 +3,28 @@ routes:
     service: servico1
     secure: false
     circuit_breaker: DefaultCircuitBreaker
-  /authenticate:
+  /authenticate/{teste}:
     service: servico1
     secure: false
     circuit_breaker: DefaultCircuitBreaker
   /summary:
+  /summary2:
+  /summary3:
+  /summary4:
     service: servico1
+    secure: true
+    circuit_breaker: DefaultCircuitBreaker
+  /authenticate4/{teste}:
+    service: servico1
+    secure: false
+    circuit_breaker: DefaultCircuitBreaker
+  /authenticate1/{teste}:
+    service: servico1
+    secure: false
+    circuit_breaker: DefaultCircuitBreaker
+  /summary23:
+  /summary24:
+    service: servico2
     secure: true
     circuit_breaker: DefaultCircuitBreaker
     

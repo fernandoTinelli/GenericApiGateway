@@ -65,7 +65,7 @@ class APIGatewayConfiguration
 
     private function getArrayRoutes(array $routesData): array
     {
-        $services = [];
+        $routes = [];
         
         if (array_key_first($routesData) != 'routes') {
             throw new HttpException(
@@ -74,10 +74,32 @@ class APIGatewayConfiguration
             );
         }
 
+        $routesOverload = [];
         foreach ($routesData['routes'] as $name => $route) {
-            $services[$name] = RouteFactory::create([$name => $route]);
+            if ($route == null) {
+                $routesOverload[$name] = null;
+                continue;
+            }
+
+            $routes[$name] = RouteFactory::create([$name => $route]);
+
+            if (count(($routesOverload)) > 0) {
+                foreach ($routesOverload as $key => $value) {
+                    $routeClone = clone($routes[$name]);
+                    $routeClone->setName($key);
+                    $routes[$key] = $routeClone;
+                }
+                $routesOverload = [];
+            }
         }
 
-        return $services;
+        if (count($routesOverload) > 0) {
+            throw new HttpException(
+                Response::HTTP_BAD_GATEWAY,
+                "Erro no arquivo de configuração de Rotas da API Gateway: há 'routes' sem dados"
+            );
+        }
+
+        return $routes;
     }
 }
