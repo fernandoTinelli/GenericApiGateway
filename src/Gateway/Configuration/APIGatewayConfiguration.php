@@ -77,14 +77,14 @@ class APIGatewayConfiguration
         $routesOverload = [];
         foreach ($routesData['routes'] as $name => $route) {
             if ($route == null) {
-                $routesOverload[$name] = null;
+                $routesOverload[] = $name;
                 continue;
             }
 
             $routes[$name] = RouteFactory::create([$name => $route]);
 
             if (count(($routesOverload)) > 0) {
-                foreach ($routesOverload as $key => $value) {
+                foreach ($routesOverload as $key) {
                     $routeClone = clone($routes[$name]);
                     $routeClone->setName($key);
                     $routes[$key] = $routeClone;
