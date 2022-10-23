@@ -6,7 +6,6 @@ use App\Gateway\Request\JsonServiceRequest;
 use App\Gateway\Response\JsonServiceResponse;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class RequestLogger
 {
@@ -17,25 +16,23 @@ class RequestLogger
         $this->logger = $logger;
     }
 
-    public function logRequest(array $data): void
+    public function logRequest(JsonServiceRequest $request): void
     {
-        $this->logger->info("request", $data);
     }
 
-    public function logResponse(JsonServiceResponse | Response $response): void
+    public function logResponse(JsonServiceResponse $response): void
     {
-        $this->logger->info('');
     }
 
-    public static function getRelevantDataToLog(Request $request = null, JsonServiceRequest $jsonRequest = null): array
+    public static function getDataLog(Request $request = null, JsonServiceRequest $jsonRequest = null): array
     {
         return array_merge(
-            self::getRequestDataArray($request),
-            self::getJsonServiceRequestDataArray($jsonRequest)
+            self::getRequestDataLog($request),
+            self::getJsonServiceRequestDataLog($jsonRequest)
         );
     }
 
-    private static function getRequestDataArray(?Request $request): array
+    private static function getRequestDataLog(?Request $request): array
     {
         if (is_null($request)) {
             return [];
@@ -58,7 +55,7 @@ class RequestLogger
         ];
     }
 
-    private static function getJsonServiceRequestDataArray(?JsonServiceRequest $request): array
+    private static function getJsonServiceRequestDataLog(?JsonServiceRequest $request): array
     {
         if (is_null($request)) {
             return [];

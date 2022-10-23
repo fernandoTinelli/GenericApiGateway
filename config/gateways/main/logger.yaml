@@ -1,0 +1,6 @@
+logger:
+  enabled: true
+  type: request | response | both
+  path: /var/log
+  file_name: main.log
+  max_kb_size: 500

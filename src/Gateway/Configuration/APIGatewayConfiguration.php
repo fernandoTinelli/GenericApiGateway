@@ -3,8 +3,10 @@
 namespace App\Gateway\Configuration;
 
 use App\Gateway\AbstractAPIGateway;
+use App\Gateway\Configuration\Factory\LoggerFactory;
 use App\Gateway\Configuration\Factory\RouteFactory;
 use App\Gateway\Configuration\Factory\ServiceFactory;
+use App\Gateway\Configuration\Model\Logger;
 use App\Gateway\Configuration\Model\Route;
 use App\Gateway\Configuration\Model\Service;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
@@ -18,19 +20,28 @@ class APIGatewayConfiguration
 
     private array $routes;
 
+    private Logger $logger;
+
     public function __construct(ContainerBagInterface $paramsBag)
     {
-        $this->services = $this->getArrayServices(
+        $this->services = $this->loadServicesData(
             Yaml::parseFile(
                 $paramsBag->get('kernel.project_dir')
-                . "/config/gateways/" . AbstractAPIGateway::$configPath . "/services.yaml"
+                    . "/config/gateways/" . AbstractAPIGateway::$configPath . "/services.yaml"
             )
         );
 
-        $this->routes = $this->getArrayRoutes(
+        $this->routes = $this->loadRoutesData(
             Yaml::parseFile(
                 $paramsBag->get('kernel.project_dir')
-                . "/config/gateways/" . AbstractAPIGateway::$configPath . "/routes.yaml"
+                    . "/config/gateways/" . AbstractAPIGateway::$configPath . "/routes.yaml"
+            )
+        );
+
+        $this->logger = $this->loadLoggerData(
+            Yaml::parseFile(
+                $paramsBag->get('kernel.project_dir')
+                    . "config/gateways/" . AbstractAPIGateway::$configPath . "/logger.yaml"
             )
         );
     }
@@ -45,7 +56,12 @@ class APIGatewayConfiguration
         return $this->services[$service] ?? null;
     }
 
-    private function getArrayServices(array $servicesData): array
+    public function getLogger(): Logger
+    {
+        return $this->logger;
+    }
+
+    private function loadServicesData(array $servicesData): array
     {
         $services = [];
         
@@ -63,7 +79,7 @@ class APIGatewayConfiguration
         return $services;
     }
 
-    private function getArrayRoutes(array $routesData): array
+    private function loadRoutesData(array $routesData): array
     {
         $routes = [];
         
@@ -101,5 +117,17 @@ class APIGatewayConfiguration
         }
 
         return $routes;
+    }
+
+    private function loadLoggerData(array $loggerData): Logger
+    {
+        if (array_key_first($loggerData) != 'logger') {
+            throw new HttpException(
+                Response::HTTP_BAD_GATEWAY,
+                "Erro no arquivo de configuração do Logger da API Gateway: raiz 'logger' não encontrada"
+            );
+        }
+
+        return LoggerFactory::create($loggerData['logger']);
     }
 }
