@@ -23,20 +23,16 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
     protected Requester $requester;
 
-    protected RequestLogger $logger;
-
     protected AbstractRequestValidator $validator;
 
     #[Required]
     public function init(
         APIGatewayConfiguration $configuration,
-        Requester $requester,
-        RequestLogger $logger
+        Requester $requester
     ): void
     {
         $this->configuration = $configuration;
         $this->requester = $requester;
-        $this->logger = $logger;
     }
 
     public function handle(Request $request): Response

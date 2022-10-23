@@ -12,8 +12,7 @@ interface APIGatewayInterface
 {
     public function init(
         APIGatewayConfiguration $configuration,
-        Requester $requester,
-        RequestLogger $logger
+        Requester $requester
     ): void;
 
     public function handle(Request $request): Response;
