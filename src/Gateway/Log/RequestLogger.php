@@ -2,9 +2,8 @@
 
 namespace App\Gateway\Log;
 
-use App\Response\JsonServiceRequest;
-use App\Response\JsonServiceResponse;
-use DateTime;
+use App\Gateway\Request\JsonServiceRequest;
+use App\Gateway\Response\JsonServiceResponse;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

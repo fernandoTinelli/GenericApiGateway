@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Requester;
+namespace App\Gateway\Requester;
 
-use App\Response\JsonServiceRequest;
-use App\Response\JsonServiceResponse;
+use App\Gateway\Request\JsonServiceRequest;
+use App\Gateway\Response\JsonServiceResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 interface RequesterInterface

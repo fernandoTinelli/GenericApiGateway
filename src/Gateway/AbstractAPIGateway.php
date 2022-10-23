@@ -3,16 +3,15 @@
 namespace App\Gateway;
 
 use App\Gateway\Configuration\APIGatewayConfiguration;
-use App\Gateway\Configuration\Model\Route;
 use App\Gateway\Log\RequestLogger;
-use App\Requester\Requester;
-use App\Response\JsonServiceRequest;
-use App\Response\JsonServiceResponse;
-use Symfony\Component\HttpFoundation\Request;
-use App\Response\ServiceResponseStatus;
+use App\Gateway\Request\JsonServiceRequest;
+use App\Gateway\Requester\Requester;
+use App\Gateway\Response\JsonServiceResponse;
+use App\Gateway\Response\ServiceResponseStatus;
+use App\Validator\AbstractRequestValidator;
 use GuzzleHttp\Cookie\CookieJar;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -20,14 +19,19 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 {
     public static string $configPath;
 
-    protected Requester $requester;
-
     protected APIGatewayConfiguration $configuration;
+
+    protected Requester $requester;
 
     protected RequestLogger $logger;
 
+    protected AbstractRequestValidator $validator;
+
     #[Required]
-    public function init(APIGatewayConfiguration $configuration, Requester $requester): void
+    public function init(
+        APIGatewayConfiguration $configuration,
+        Requester $requester
+    ): void
     {
         $this->configuration = $configuration;
         $this->requester = $requester;
@@ -35,15 +39,21 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
     public function handle(Request $request): Response
     {
-        $uri = $request->getPathInfo();
-        $ret = $this->validateRequest($uri);
-
-        if ($ret instanceof JsonResponse) {
-            return $ret;
+        $jsonServiceRequest = new JsonServiceRequest($request, $this->configuration);
+        
+        $violations = $this->validator->validate($jsonServiceRequest);
+        if ($violations->hasViolations()) {
+            return JsonServiceResponse::encode(
+                new JsonServiceResponse(
+                    status: ServiceResponseStatus::FAIL,
+                    data: $violations->getAll(),
+                    message: "Requisição Inválida."
+                )
+            );
         }
 
-        if ($ret->isSecure()) {
-            if (!$this->userHasValidAuthentication($request)) {
+        if ($jsonServiceRequest->getRoute()->isSecure()) {
+            if (!$this->userHasValidAuthentication($jsonServiceRequest)) {
                 // return JsonServiceResponse::encode(new JsonServiceResponse(
                 //     status: ServiceResponseStatus::FAIL,
                 //     message: 'Você não está autenticado ou sua autenticação expirou'
@@ -51,15 +61,16 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
             }
         }
 
-        return $this->getResponse($ret, $request);
+        return $this->getResponse($jsonServiceRequest);
     }
 
     public function authenticate(Request $request): Response
     {
-        $routeLogin = $this->configuration->getRoute('/login');
+        $jsonServiceRequest = new JsonServiceRequest($request, $this->configuration);
         
-        $jsonResponse = $this->getResponse($routeLogin, $request);
-        $jsonServiceReponse = JsonServiceResponse::decode($jsonResponse);
+        $response = $this->getResponse($jsonServiceRequest);
+
+        $jsonServiceReponse = JsonServiceResponse::decode($response);
 
         if ($jsonServiceReponse->getStatus() === ServiceResponseStatus::SUCCESS) {
             $jar = new CookieJar();
@@ -77,20 +88,14 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
             }
         }
 
-        return $jsonResponse;
+        return $response;
     }
 
-    protected function getResponse(Route $route, Request $request): Response
+    protected function getResponse(JsonServiceRequest $request): Response
     {
-    
-        $url = $this->configuration->getService($route->getServiceName())->getAddress()
-        . $route->getName();
+        // $this->logger->logRequest(RequestLogger::getRelevantDataToLog($request, $jsonServiceRequest));
 
-        $jsonServiceRequest = new JsonServiceRequest($url, $request, $route->getCircuitBreaker());
-
-        $this->logger->logRequest(RequestLogger::getRelevantDataToLog($request, $jsonServiceRequest));
-
-        $response = $this->requester->request($jsonServiceRequest);
+        $response = $this->requester->request($request);
 
         if ($response instanceof Response) {
             return $response;
@@ -99,46 +104,22 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         return JsonServiceResponse::encode($response);
     }
 
-    protected function userHasValidAuthentication(Request $request): bool
+    protected function userHasValidAuthentication(JsonServiceRequest $request): bool
     {
-        if (!$request->cookies->has('BEARER')) {
+        if (is_null($request->getOptions()->getCookieByName('BEARER'))) {
             return false;
         }
 
         $routeAuthentication = $this->configuration->getRoute('/authenticate');
 
-        $url = $this->configuration->getService($routeAuthentication->getServiceName())->getAddress()
-                . $routeAuthentication->getName();
-
-        $jsonServiceRequest = new JsonServiceRequest($url, $request, $routeAuthentication->getCircuitBreaker());
-        
-        $jsonServiceResponse = $this->requester->request($jsonServiceRequest);
+        $clonedRequest = clone($request);
+        $clonedRequest->changeRoute($routeAuthentication);
+        $jsonServiceResponse = $this->requester->request($clonedRequest);
 
         if ($jsonServiceResponse instanceof Response) {
             return false;
         }
 
         return $jsonServiceResponse->getStatus() === ServiceResponseStatus::SUCCESS;
-    }
-
-    protected function validateRequest(string $uri): Route | JsonResponse
-    {
-        $route = $this->configuration->getRoute($uri);
-        if (is_null($route)) {
-            return JsonServiceResponse::encode(new JsonServiceResponse(
-                status: ServiceResponseStatus::FAIL,
-                message: 'Recurso solicitado não encontrado'
-            ));
-        }
-
-        $service = $this->configuration->getService($route->getServiceName());
-        if (is_null($service)) {
-            return JsonServiceResponse::encode(new JsonServiceResponse(
-                status: ServiceResponseStatus::FAIL,
-                message: 'Nenhum serviço encontrado para a recurso solicitado'
-            ));
-        }
-
-        return $route;
     }
 }

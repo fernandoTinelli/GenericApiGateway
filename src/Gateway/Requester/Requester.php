@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Requester;
+namespace App\Gateway\Requester;
 
-use App\Response\JsonServiceRequest;
-use App\Response\JsonServiceResponse;
-use App\Response\ServiceResponseStatus;
+use App\Gateway\Request\JsonServiceRequest;
+use App\Gateway\Response\JsonServiceResponse;
+use App\Gateway\Response\ServiceResponseStatus;
 use GuzzleHttp\Client;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,9 +16,9 @@ class Requester implements RequesterInterface
             $client = new Client(['cookies' => true]);
 
             $response = $client->request(
-                uri: $request->getUrl(),
+                uri: $request->getService()->getAddress() . $request->getRoute()->getName(),
                 method: $request->getMethod(),
-                options: $request->getServiceRequestOptions()->getOptions()
+                options: $request->getOptions()->toArray()
             );
 
             $response = json_decode((string) $response->getBody(), true);
@@ -29,7 +29,7 @@ class Requester implements RequesterInterface
                 message: $response['message']
             );
         } catch (\Throwable $th) {
-            return $request->getCircuitBreaker()->doDummy($request, $th->getMessage());
+            return $request->getRoute()->getCircuitBreaker()->doDummy($request, $th->getMessage());
         }
     }
 }

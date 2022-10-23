@@ -2,7 +2,7 @@
 
 namespace App\Gateway\CircuitBreaker;
 
-use App\Response\JsonServiceRequest;
+use App\Gateway\Request\JsonServiceRequest;
 use Symfony\Component\HttpFoundation\Response;
 
 interface CircuitBreakerInterface

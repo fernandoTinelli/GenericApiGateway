@@ -3,9 +3,9 @@
 namespace App\Gateway\CircuitBreaker\Types;
 
 use App\Gateway\CircuitBreaker\CircuitBreakerInterface;
-use App\Response\JsonServiceRequest;
-use App\Response\JsonServiceResponse;
-use App\Response\ServiceResponseStatus;
+use App\Gateway\Request\JsonServiceRequest;
+use App\Gateway\Response\JsonServiceResponse;
+use App\Gateway\Response\ServiceResponseStatus;
 use Symfony\Component\HttpFoundation\Response;
 
 class DefaultCircuitBreaker implements CircuitBreakerInterface

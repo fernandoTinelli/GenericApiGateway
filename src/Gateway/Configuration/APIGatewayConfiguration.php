@@ -20,17 +20,17 @@ class APIGatewayConfiguration
 
     public function __construct(ContainerBagInterface $paramsBag)
     {
-        $this->routes = $this->getArrayRoutes(
-            Yaml::parseFile(
-                $paramsBag->get('kernel.project_dir')
-                . "/config/gateways/" . AbstractAPIGateway::$configPath . "/routes.yaml"
-            )
-        );
-
         $this->services = $this->getArrayServices(
             Yaml::parseFile(
                 $paramsBag->get('kernel.project_dir')
                 . "/config/gateways/" . AbstractAPIGateway::$configPath . "/services.yaml"
+            )
+        );
+
+        $this->routes = $this->getArrayRoutes(
+            Yaml::parseFile(
+                $paramsBag->get('kernel.project_dir')
+                . "/config/gateways/" . AbstractAPIGateway::$configPath . "/routes.yaml"
             )
         );
     }
