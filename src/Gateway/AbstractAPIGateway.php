@@ -3,7 +3,6 @@
 namespace App\Gateway;
 
 use App\Gateway\Configuration\APIGatewayConfiguration;
-use App\Gateway\Log\RequestLogger;
 use App\Gateway\Request\JsonServiceRequest;
 use App\Gateway\Requester\Requester;
 use App\Gateway\Response\JsonServiceResponse;
