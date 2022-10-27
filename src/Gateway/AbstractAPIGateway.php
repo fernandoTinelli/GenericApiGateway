@@ -51,41 +51,39 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
         if ($jsonServiceRequest->getRoute()->isSecure()) {
             if (!$this->isAuthenticated($jsonServiceRequest)) {
-                // return JsonServiceResponse::encode(new JsonServiceResponse(
-                //     status: ServiceResponseStatus::FAIL,
-                //     message: 'Você não está autenticado ou sua autenticação expirou'
-                // ));
+                return JsonServiceResponse::encode(new JsonServiceResponse(
+                    status: ServiceResponseStatus::FAIL,
+                    message: 'Você não está autenticado ou sua autenticação expirou'
+                ));
             }
         }
 
-        return $this->getResponse($jsonServiceRequest);
+        return JsonServiceResponse::encode($this->requester->request($jsonServiceRequest));
     }
 
     public function login(Request $request): Response
     {
         $jsonServiceRequest = new JsonServiceRequest($request, $this->configuration);
         
-        $response = $this->getResponse($jsonServiceRequest);
+        $response = $this->requester->request($jsonServiceRequest);
 
-        $jsonServiceReponse = JsonServiceResponse::decode($response);
-
-        if ($jsonServiceReponse->getStatus() === ServiceResponseStatus::SUCCESS) {
+        if ($response->getStatus() === ServiceResponseStatus::SUCCESS) {
             $jar = new CookieJar();
             $cookieTokenJWT = $jar->getCookieByName('BEARER');
             if (!is_null($cookieTokenJWT)) {
-                $response = new Response();
-                $response->headers->setCookie(new Cookie(
+                $cookieResponse = new Response();
+                $cookieResponse->headers->setCookie(new Cookie(
                     name: 'BEARER',
                     value: $cookieTokenJWT->getValue(),
                     expire: time()*3600,
                     domain: 'localhost',
                     httpOnly: true
                 ));
-                $response->send();
+                $cookieResponse->send();
             }
         }
 
-        return $response;
+        return JsonServiceResponse::encode($response);
     }
 
     protected function isAuthenticated(JsonServiceRequest $request): bool
@@ -100,21 +98,6 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         $clonedRequest->changeRoute($routeAuthentication);
         $jsonServiceResponse = $this->requester->request($clonedRequest);
 
-        if ($jsonServiceResponse instanceof Response) {
-            return false;
-        }
-
         return $jsonServiceResponse->getStatus() === ServiceResponseStatus::SUCCESS;
-    }
-
-    protected function getResponse(JsonServiceRequest $request): Response
-    {
-        $response = $this->requester->request($request);
-
-        if ($response instanceof Response) {
-            return $response;
-        }
-        
-        return JsonServiceResponse::encode($response);
     }
 }

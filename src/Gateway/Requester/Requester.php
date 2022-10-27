@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class Requester implements RequesterInterface
 {
-    public function request(JsonServiceRequest $request): JsonServiceResponse | Response
+    public function request(JsonServiceRequest $request): JsonServiceResponse
     {
         try {
             $client = new Client(['cookies' => true]);
