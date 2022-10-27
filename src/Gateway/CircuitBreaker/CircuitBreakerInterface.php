@@ -7,5 +7,5 @@ use Symfony\Component\HttpFoundation\Response;
 
 interface CircuitBreakerInterface
 {
-    public function doDummy(JsonServiceRequest $request, string $errorMessage = ""): Response;
+    public function handleBreak(JsonServiceRequest $request, string $errorMessage = ""): Response;
 }

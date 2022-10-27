@@ -29,7 +29,7 @@ class Requester implements RequesterInterface
                 message: $response['message']
             );
         } catch (\Throwable $th) {
-            return $request->getRoute()->getCircuitBreaker()->doDummy($request, $th->getMessage());
+            return $request->getRoute()->getCircuitBreaker()->handleBreak($request, $th->getMessage());
         }
     }
 }
