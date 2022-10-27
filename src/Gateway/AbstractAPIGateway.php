@@ -39,9 +39,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
     }
 
     public function handle(JsonServiceRequest $request): Response
-    {
-        // $jsonServiceRequest = new JsonServiceRequest($request, $this->configuration);
-        
+    {       
         $violations = $this->validator->validate($request);
         if ($violations->hasViolations()) {
             return JsonServiceResponse::encode(
@@ -66,7 +64,11 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
     }
 
     public function login(JsonServiceRequest $request): Response
-    {        
+    {     
+        $routeLogin = $this->configuration->getRoute('/login');
+
+        $clonedRequest = clone($request);
+        $clonedRequest->changeRoute($routeLogin);
         $response = $this->requester->request($request);
 
         if ($response->getStatus() === ServiceResponseStatus::SUCCESS) {
@@ -98,8 +100,8 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
         $clonedRequest = clone($request);
         $clonedRequest->changeRoute($routeAuthentication);
-        $jsonServiceResponse = $this->requester->request($clonedRequest);
+        $response = $this->requester->request($clonedRequest);
 
-        return $jsonServiceResponse->getStatus() === ServiceResponseStatus::SUCCESS;
+        return $response->getStatus() === ServiceResponseStatus::SUCCESS;
     }
 }
