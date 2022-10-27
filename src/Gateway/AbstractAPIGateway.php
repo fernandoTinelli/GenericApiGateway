@@ -72,8 +72,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         $response = $this->requester->request($request);
 
         if ($response->getStatus() === ServiceResponseStatus::SUCCESS) {
-            $jar = new CookieJar();
-            $cookieTokenJWT = $jar->getCookieByName('BEARER');
+            $cookieTokenJWT = $request->getOptions()->getCookieByName('BEARER');
             if (!is_null($cookieTokenJWT)) {
                 $cookieResponse = new Response();
                 $cookieResponse->headers->setCookie(new Cookie(
