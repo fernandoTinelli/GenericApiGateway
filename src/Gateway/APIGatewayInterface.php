@@ -3,9 +3,8 @@
 namespace App\Gateway;
 
 use App\Gateway\Configuration\APIGatewayConfiguration;
-use App\Gateway\Log\RequestLogger;
+use App\Gateway\Request\JsonServiceRequest;
 use App\Gateway\Requester\Requester;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 interface APIGatewayInterface
@@ -15,7 +14,9 @@ interface APIGatewayInterface
         Requester $requester
     ): void;
 
-    public function handle(Request $request): Response;
+    public function getConfiguration(): APIGatewayConfiguration;
 
-    public function login(Request $request): Response;
+    public function handle(JsonServiceRequest $request): Response;
+
+    public function login(JsonServiceRequest $request): Response;
 }

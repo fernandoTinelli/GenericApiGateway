@@ -10,7 +10,6 @@ use App\Gateway\Response\ServiceResponseStatus;
 use App\Validator\AbstractRequestValidator;
 use GuzzleHttp\Cookie\CookieJar;
 use Symfony\Component\HttpFoundation\Cookie;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -34,11 +33,16 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         $this->requester = $requester;
     }
 
-    public function handle(Request $request): Response
+    public function getConfiguration(): APIGatewayConfiguration
     {
-        $jsonServiceRequest = new JsonServiceRequest($request, $this->configuration);
+        return $this->configuration;
+    }
+
+    public function handle(JsonServiceRequest $request): Response
+    {
+        // $jsonServiceRequest = new JsonServiceRequest($request, $this->configuration);
         
-        $violations = $this->validator->validate($jsonServiceRequest);
+        $violations = $this->validator->validate($request);
         if ($violations->hasViolations()) {
             return JsonServiceResponse::encode(
                 new JsonServiceResponse(
@@ -49,8 +53,8 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
             );
         }
 
-        if ($jsonServiceRequest->getRoute()->isSecure()) {
-            if (!$this->isAuthenticated($jsonServiceRequest)) {
+        if ($request->getRoute()->isSecure()) {
+            if (!$this->isAuthenticated($request)) {
                 return JsonServiceResponse::encode(new JsonServiceResponse(
                     status: ServiceResponseStatus::FAIL,
                     message: 'Você não está autenticado ou sua autenticação expirou'
@@ -58,14 +62,12 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
             }
         }
 
-        return JsonServiceResponse::encode($this->requester->request($jsonServiceRequest));
+        return JsonServiceResponse::encode($this->requester->request($request));
     }
 
-    public function login(Request $request): Response
-    {
-        $jsonServiceRequest = new JsonServiceRequest($request, $this->configuration);
-        
-        $response = $this->requester->request($jsonServiceRequest);
+    public function login(JsonServiceRequest $request): Response
+    {        
+        $response = $this->requester->request($request);
 
         if ($response->getStatus() === ServiceResponseStatus::SUCCESS) {
             $jar = new CookieJar();
