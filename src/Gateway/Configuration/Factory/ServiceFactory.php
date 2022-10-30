@@ -3,8 +3,7 @@
 namespace App\Gateway\Configuration\Factory;
 
 use App\Gateway\Configuration\Model\Service;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Exception;
 
 class ServiceFactory
 {
@@ -29,8 +28,7 @@ class ServiceFactory
             foreach ($props as $prop => $value) {
                 // Validate the props of the route
                 if (!array_key_exists($prop, self::PROPERTIES)) {
-                    throw new HttpException(
-                        Response::HTTP_BAD_GATEWAY,
+                    throw new Exception(
                         "Erro no arquivo de configuração de Serviços da API Gateway: $prop não é uma propriedade válida"
                     );
                 }
@@ -40,8 +38,7 @@ class ServiceFactory
         // Validate the required props
         foreach (self::PROPERTIES as $prop => $required) {
             if ($required && !array_key_exists($prop, $data[array_key_first($data)])) {
-                throw new HttpException(
-                    Response::HTTP_BAD_GATEWAY,
+                throw new Exception(
                     "Erro no arquivo de configuração de Serviços da API Gateway: $prop não encontrada"
                 );
             }

@@ -4,7 +4,7 @@ namespace App\Gateway\Configuration\Model;
 
 use App\Gateway\CircuitBreaker\CircuitBreakerInterface;
 use App\Gateway\CircuitBreaker\Types\DefaultCircuitBreaker;
-use Symfony\Component\VarExporter\Exception\ClassNotFoundException;
+use DomainException;
 
 class Route
 {
@@ -61,11 +61,11 @@ class Route
     {
         try {
             if (is_null($circuitBreakerClassName)) {
-                throw new ClassNotFoundException("");
+                throw new DomainException("");
             }
 
             $this->circuitBreaker = new ("\App\Gateway\CircuitBreaker\Types\$circuitBreakerClassName")();
-        } catch (ClassNotFoundException $e) {
+        } catch (DomainException $e) {
             $this->circuitBreaker = new DefaultCircuitBreaker();
         }
         
