@@ -6,7 +6,6 @@ use App\Gateway\Request\JsonServiceRequest;
 use App\Gateway\Response\JsonServiceResponse;
 use App\Gateway\Response\ServiceResponseStatus;
 use GuzzleHttp\Client;
-use Symfony\Component\HttpFoundation\Response;
 
 class Requester implements RequesterInterface
 {

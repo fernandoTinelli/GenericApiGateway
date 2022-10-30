@@ -8,6 +8,7 @@ use App\Gateway\Requester\Requester;
 use App\Gateway\Response\JsonServiceResponse;
 use App\Gateway\Response\ServiceResponseStatus;
 use App\Validator\AbstractRequestValidator;
+use LDAP\Result;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -50,13 +51,11 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
             );
         }
 
-        if ($request->getRoute()->isSecure()) {
-            if (!$this->isAuthenticated($request)) {
-                return JsonServiceResponse::encode(new JsonServiceResponse(
-                    status: ServiceResponseStatus::FAIL,
-                    message: 'Você não está autenticado ou sua autenticação expirou'
-                ));
-            }
+        if ($request->getRoute()->isSecure() && !$this->isAuthenticated($request)) {
+            return JsonServiceResponse::encode(new JsonServiceResponse(
+                status: ServiceResponseStatus::FAIL,
+                message: 'Você não está autenticado ou sua autenticação expirou'
+            ));
         }
 
         return JsonServiceResponse::encode($this->requester->request($request));
@@ -86,6 +85,28 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         }
 
         return JsonServiceResponse::encode($response);
+    }
+
+    public function logout(JsonServiceRequest $request): Response
+    {
+        $cookieTokenJWT = $request->getOptions()->getCookieByName('BEARER');
+        if (!is_null($cookieTokenJWT)) {
+            $cookieResponse = new Response();
+            $cookieResponse->headers->setCookie(
+                new Cookie(
+                    name: 'BEARER',
+                    value: $cookieTokenJWT->getValue(),
+                    expire: time() - 3600,
+                    domain: 'localhost',
+                    httpOnly: true
+                )
+            );
+            $cookieResponse->send();
+        }
+
+        return JsonServiceResponse::encode(
+            new JsonServiceResponse()
+        );
     }
 
     protected function isAuthenticated(JsonServiceRequest $request): bool

@@ -19,4 +19,6 @@ interface APIGatewayInterface
     public function handle(JsonServiceRequest $request): Response;
 
     public function login(JsonServiceRequest $request): Response;
+
+    public function logout(JsonServiceRequest $request): Response;
 }
