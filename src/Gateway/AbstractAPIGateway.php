@@ -8,7 +8,6 @@ use App\Gateway\Requester\Requester;
 use App\Gateway\Response\JsonServiceResponse;
 use App\Gateway\Response\ServiceResponseStatus;
 use App\Validator\AbstractRequestValidator;
-use LDAP\Result;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
