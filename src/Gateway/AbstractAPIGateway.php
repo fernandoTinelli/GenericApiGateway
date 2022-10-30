@@ -23,7 +23,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
     protected AbstractRequestValidator $validator;
 
     #[Required]
-    public function init(
+    private function init(
         APIGatewayConfiguration $configuration,
         Requester $requester
     ): void
