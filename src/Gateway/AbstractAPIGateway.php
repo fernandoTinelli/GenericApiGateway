@@ -8,6 +8,7 @@ use App\Gateway\Requester\Requester;
 use App\Gateway\Response\JsonServiceResponse;
 use App\Gateway\Response\ServiceResponseStatus;
 use App\Validator\AbstractRequestValidator;
+use GuzzleHttp\Cookie\SetCookie;
 use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
@@ -69,18 +70,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         $response = $this->requester->request($request);
 
         if ($response->getStatus() === ServiceResponseStatus::SUCCESS) {
-            $cookieTokenJWT = $request->getOptions()->getCookieByName('BEARER');
-            if (!is_null($cookieTokenJWT)) {
-                $cookieResponse = new Response();
-                $cookieResponse->headers->setCookie(new Cookie(
-                    name: 'BEARER',
-                    value: $cookieTokenJWT->getValue(),
-                    expire: time()*3600,
-                    domain: 'localhost',
-                    httpOnly: true
-                ));
-                $cookieResponse->send();
-            }
+            $this->sendCookie($request->getOptions()->getCookieByName('BEARER'));
         }
 
         return JsonServiceResponse::encode($response);
@@ -88,20 +78,7 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
 
     public function logout(JsonServiceRequest $request): Response
     {
-        $cookieTokenJWT = $request->getOptions()->getCookieByName('BEARER');
-        if (!is_null($cookieTokenJWT)) {
-            $cookieResponse = new Response();
-            $cookieResponse->headers->setCookie(
-                new Cookie(
-                    name: 'BEARER',
-                    value: $cookieTokenJWT->getValue(),
-                    expire: time() - 3600,
-                    domain: 'localhost',
-                    httpOnly: true
-                )
-            );
-            $cookieResponse->send();
-        }
+        $this->sendCookie($request->getOptions()->getCookieByName('BEARER'), time() - 3600);
 
         return JsonServiceResponse::encode(
             new JsonServiceResponse()
@@ -121,5 +98,22 @@ abstract class AbstractAPIGateway implements APIGatewayInterface
         $response = $this->requester->request($clonedRequest);
 
         return $response->getStatus() === ServiceResponseStatus::SUCCESS;
+    }
+
+    protected function sendCookie(?SetCookie $cookie, int $expire = null)
+    {
+        if (!is_null($cookie)) {
+            $cookieResponse = new Response();
+            $cookieResponse->headers->setCookie(
+                new Cookie(
+                    name: $cookie->getName(),
+                    value: $cookie->getValue(),
+                    expire: $expire ?? time() * 3600,
+                    domain: $cookie->getDomain(),
+                    httpOnly: $cookie->getHttpOnly()
+                )
+            );
+            $cookieResponse->send();
+        }
     }
 }
