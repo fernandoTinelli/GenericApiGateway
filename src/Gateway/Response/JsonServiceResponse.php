@@ -35,6 +35,16 @@ class JsonServiceResponse
         return $this->status;
     }
 
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    public function getMessage(): string
+    {
+        return $this->message;
+    }
+
     public static function encode(self $response): JsonResponse
     {
         return new JsonResponse([

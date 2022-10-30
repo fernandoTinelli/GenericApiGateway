@@ -9,10 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 interface APIGatewayInterface
 {
-    public function init(
-        APIGatewayConfiguration $configuration,
-        Requester $requester
-    ): void;
+    public function init(APIGatewayConfiguration $configuration, Requester $requester): void;
 
     public function getConfiguration(): APIGatewayConfiguration;
 
